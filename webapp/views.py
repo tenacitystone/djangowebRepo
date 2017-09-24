@@ -97,75 +97,83 @@ def search(request):
 
 def login(request):
     error = []
-    print("POST")
+    print("login method "+request.method)
     print(request.POST)
-    if 'username' in request.POST:
-        username = request.POST['username']
-        if len(username) <= 0:
-            error.append("请输入用户名")
-            return render_to_response('login.html', {'ErrorMessage': error})
-        password1 = request.POST['password']
-        if len(password1) <= 0:
-            error.append("请输入密码")
-            return render_to_response('login.html', {'ErrorMessage': error})
+    if request.method == "POST":
+        if 'username' in request.POST:
+            username = request.POST['username']
+            if len(username) <= 0:
+                error.append("请输入用户名")
+                return render_to_response('login.html', {'ErrorMessage': error})
+            password1 = request.POST['password']
+            if len(password1) <= 0:
+                error.append("请输入密码")
+                return render_to_response('login.html', {'ErrorMessage': error})
 
-        password = make_password(password1, 'django', 'pbkdf2_sha256')
+            password = make_password(password1, 'django', 'pbkdf2_sha256')
 
-        tempUser = UserInfo.objects.filter(user_name=username)
-        if len(tempUser) <= 0:
-            print("database does not has this user")
-            error.append("该用户不存在")
-            return render_to_response('login.html', {'ErrorMessage': error})
+            tempUser = UserInfo.objects.filter(user_name=username)
+            if len(tempUser) <= 0:
+                print("database does not has this user")
+                error.append("该用户不存在")
+                return render_to_response('login.html', {'ErrorMessage': error})
 
-        reslut = UserInfo.objects.filter(user_name=username, user_password=password)
+            reslut = UserInfo.objects.filter(user_name=username, user_password=password)
 
-        if len(reslut) > 0:
-            user = UserInfo.objects.get(user_name=username)
-            return render_to_response('home.html', {'user': user})
+            if len(reslut) > 0:
+                user = UserInfo.objects.get(user_name=username)
+                return render_to_response('home.html', {'user': user})
+            else:
+                error.append("请输入正确的密码")
+                return render_to_response('login.html', {'ErrorMessage': error})
         else:
-            error.append("请输入正确的密码")
-            return render_to_response('login.html', {'ErrorMessage': error})
+            return render_to_response('login.html', {'ErrorMessage': None})
     else:
-        return render_to_response('login.html', {'ErrorMessage': None})
+        return render_to_response('login.html')
+
 
 def logout(request):
     return render_to_response('home.html', {'user': None})
 
 def register(request):
-    if 'username' in request.POST:
-        username = request.POST['username']
-        errors = []
-        if username is not None:
-            filterResult = UserInfo.objects.filter(user_name=username)
-            if len(filterResult) > 0:
-                return render_to_response('register.html', {"errors": "用户名已存在"})
-            password1 = request.POST['password']
-            password2 = request.POST['againpassword']
-            if (password1 != password2):
-                errors.append("两次输入的密码不一致!")
-                return render_to_response('register.html', {'errors': errors})
+    print("register method   "+request.method)
+    if request.method == "POST":
+        if 'username' in request.POST:
+            username = request.POST['username']
+            errors = []
+            if username is not None:
+                filterResult = UserInfo.objects.filter(user_name=username)
+                if len(filterResult) > 0:
+                    return render_to_response('register.html', {"errors": "用户名已存在"})
+                password1 = request.POST['password']
+                password2 = request.POST['againpassword']
+                if (password1 != password2):
+                    errors.append("两次输入的密码不一致!")
+                    return render_to_response('register.html', {'errors': errors})
 
-            password1 = password2
+                password1 = password2
 
-            #使用正则表达式判断输入的手机号码
-            phone = request.POST['phone']
-            p2 = re.compile('^0\d{2,3}\d{7,8}$|^1[358]\d{9}$|^147\d{8}')
-            phonematch = p2.match(phone)
-            if not phonematch:
-                errors.append("请输入正确的手机号码!")
-                return render_to_response('register.html', {'errors': errors})
+                # 使用正则表达式判断输入的手机号码
+                phone = request.POST['phone']
+                p2 = re.compile('^0\d{2,3}\d{7,8}$|^1[358]\d{9}$|^147\d{8}')
+                phonematch = p2.match(phone)
+                if not phonematch:
+                    errors.append("请输入正确的手机号码!")
+                    return render_to_response('register.html', {'errors': errors})
 
-            address = request.POST['address']
+                address = request.POST['address']
 
-            password = make_password(password1, 'django', 'pbkdf2_sha256')
-            print("password = " + password)
-            # 将表单写入数据库
-            user = UserInfo.objects.create(user_name=username,
-                                           user_password=password,
-                                           user_phone_number=phone,
-                                           user_address=address)
-            user.save()
+                password = make_password(password1, 'django', 'pbkdf2_sha256')
+                print("password = " + password)
+                # 将表单写入数据库
+                user = UserInfo.objects.create(user_name=username,
+                                               user_password=password,
+                                               user_phone_number=phone,
+                                               user_address=address)
+                user.save()
 
-            return render_to_response('home.html', {'user': user})
+                return render_to_response('home.html', {'user': user})
+        else:
+            return render_to_response('register.html', None)
     else:
-        return render_to_response('register.html', None)
+        return render_to_response('register.html')
