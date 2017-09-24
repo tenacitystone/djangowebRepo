@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+    {% if productArray %}
+        {% for product in productArray %}
+            <hr class="featurette-divider">
+
+            <div class="row featurette">
+                <div class="col-md-7 col-md-push-5">
+                    <h2 class="featurette-heading">{{ product.pName }}</h2>
+                    <p class="lead">Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper. Praesent commodo cursus magna, vel scelerisque nisl consectetur.</p>
+                    <a href="{% url 'addToCart' %}?pid={{ product.pId }}">
+                        <button type="submit" class="btn btn-default pull-right">
+                            <span class="glyphicon glyphicon-shopping-cart"/>
+                        </button>
+                    </a>
+                </div>
+
+                <div class="col-md-5 col-md-pull-7">
+                    <a href="{% url 'addToCart' %}?pid={{ product.pId }}">
+                        <img class="featurette-image img-responsive center-block" src="{% static "images/" %}{{ product.pIconPath }}" alt="Generic placeholder image" width="400" height="300">
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+        <hr class="featurette-divider">
+        <p class="text-center">总共有{{ productArray|length }}个产品</p>
+        <div class="text-center">
+            <ul class="pagination">
+                {% ifnotequal cur_page 1 %}
+                <li><a href="?curPage={{ cur_page }}&&pageType=Previous">&laquo;</a></li>
+                {% endifnotequal %}
+                <li {% ifequal cur_page 1 %} class="active" {% endifequal %}><a href="?curPage=1">1</a></li>
+                <li {% ifequal cur_page 2 %} class="active" {% endifequal %}><a href="?curPage=2">2</a></li>
+                <li {% ifequal cur_page 3 %} class="active" {% endifequal %}><a href="?curPage=3">3</a></li>
+                {% ifnotequal cur_page all_page %}
+                <li><a href="?curPage={{ cur_page }}&&pageType=Next">&raquo;</a></li>
+                {% endifnotequal %}
+            </ul>
+        </div>
+
+    {% else %}
+        <div class="text-center">
+            <p style="color: red;">找不到呀!╮(╯-╰)╭</p>
+        </div>
+    {% endif %}
+    <!--a href="{% url 'home' %}">Go Home</a-->
+
+{% endblock %}
+
+{% block tail %}
+    {% include 'tail.html' %}
+{% endblock %}
